@@ -9,7 +9,7 @@ The code was tested on top of Lasagne (version 0.2.dev1) and Theano (0.9.0dev2).
 SGANs can generate sample textures of arbitrary size that look strikingly similar - but not exactly the same - compared to a single (or several) source image(s).
 - SGANs can be thought of as a convolutional roll-out of [Radford et al.'s](https://github.com/Newmu/dcgan_code) deep convolutional generative adversarial networks for texture synthesis
 - the fully convolutional nature allows for real-time generation of high resolution images
-- the method can fuse multiple source images and has highly scalable w.r.t. to output texture size and allows for generation of tiled textures
+- the method can fuse multiple source images and is highly scalable w.r.t. to output texture size and allows for generation of tiled textures
 
 
 ### Examples
