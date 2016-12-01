@@ -40,16 +40,17 @@ def sharedX(X, dtype=theano.config.floatX, name=None):
 # network code
 class SGAN(object):
 
-    def __init__(self, config=None, name=None):
+    def __init__(self, name=None):
         '''
-        @param config   configuration class
+        @static configuration class
         @param name     load stored sgan model
         '''
+        self.config = Config
         if name is not None:
             print "loading parameters from file:",name
 
             vals =joblib.load(name)
-            self.config = vals["config"]
+            
             
             self.dis_W = [sharedX(p) for p in vals["dis_W"]]
             self.dis_g = [sharedX(p) for p in vals["dis_g"]]
@@ -58,12 +59,31 @@ class SGAN(object):
             self.gen_W = [sharedX(p) for p in vals["gen_W"]]
             self.gen_g = [sharedX(p) for p in vals["gen_g"]]
             self.gen_b = [sharedX(p) for p in vals["gen_b"]]
+            
+            ##now overwrite the static config with the correct values
+            self.config.gen_ks = []
+            self.config.gen_fn = []
+            l = len(vals["gen_W"])
+            for i in range(l):
+                if i==0:
+                    self.config.nz = vals["gen_W"][i].shape[0]
+                else:
+                    self.config.gen_fn +=[vals["gen_W"][i].shape[0]]
+                self.config.gen_ks += [(vals["gen_W"][i].shape[2],vals["gen_W"][i].shape[3])]
+            self.config.nc = vals["gen_W"][i].shape[1]
+            self.config.gen_fn +=[self.config.nc]
+
+            self.config.dis_ks = []
+            self.config.dis_fn = []
+            l = len(vals["dis_W"])
+            for i in range(l):
+                self.config.dis_fn +=[vals["dis_W"][i].shape[1]]   
+                self.config.dis_ks += [(vals["gen_W"][i].shape[2],vals["gen_W"][i].shape[3])]             
 
             self._setup_gen_params(self.config.gen_ks, self.config.gen_fn)
             self._setup_dis_params(self.config.dis_ks, self.config.dis_fn)
 
         else:
-            self.config = config
             self._setup_gen_params(self.config.gen_ks, self.config.gen_fn)
             self._setup_dis_params(self.config.dis_ks, self.config.dis_fn)
             ##
@@ -85,7 +105,7 @@ class SGAN(object):
         vals["gen_g"] = [p.get_value() for p in self.gen_g]
         vals["gen_b"] = [p.get_value() for p in self.gen_b]
         
-        joblib.dump(vals,name)
+        joblib.dump(vals,name,True)
 
 
     def _setup_gen_params(self, gen_ks, gen_fn):
@@ -232,7 +252,7 @@ if __name__=="__main__":
     c           = Config
 
     if c.load_name   == None:
-        sgan        = SGAN(c)
+        sgan        = SGAN()
     else:
         sgan        = SGAN(name='models/' + c.load_name)
         
