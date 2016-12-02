@@ -21,6 +21,10 @@ This model was trained on a google maps image of barcelona, and yields a texture
 
 ![](samples/stored_models_barcac_filters64_npx257_5gL_5dL_epoch50.sgan.jpg)
 
+It will also create a tilable periodic texture of the city, which is another capability of our SGAN model.
+You can look at the script and tune how big textures you want to create, by changing the parameters NZ1 and NZ2. 
+
+![](samples/TILE_models_barcac_filters64_npx257_5gL_5dL_epoch50.sgan_(256, 256)_(2, 3).jpg)
 
 ### Training the Model
 To train the model on new images, edit the config.py file and set the texture_dir variable to a folder containing the image(s) you want to learn from. You might also want to change other parameters of the network there (e.g. depth, number of filters per layer etc...). Then run
