@@ -1,48 +1,14 @@
-# Spatial Generative Adversarial Networks
+# Periodic Spatial Generative Adversarial Networks
 
-This code implements Spatial Generative Adversarial Networks (SGANs) on top of Lasagne/Theano, as published in the paper
-[https://arxiv.org/abs/1611.08207](https://arxiv.org/abs/1611.08207)
+This code implements Periodic Spatial Generative Adversarial Networks (PSGANs) on top of Lasagne/Theano.
 
 The code was tested on top of Lasagne (version 0.2.dev1) and Theano (0.9.0dev2).
 
-### Very Brief Model Description
-SGANs can generate sample textures of arbitrary size that look strikingly similar - but not exactly the same - compared to a single (or several) source image(s).
-- SGANs can be thought of as a convolutional roll-out of [Radford et al.'s](https://github.com/Newmu/dcgan_code) deep convolutional generative adversarial networks for texture synthesis
-- the fully convolutional nature allows for real-time generation of high resolution images
-- the method can fuse multiple source images and is highly scalable w.r.t. to output texture size and allows for generation of tiled textures
-
-
-### Examples
-You can generate samples from a stored model. E.g. you can use the checked-in model:
-```
-python demo_generation.py models/barcac_filters64_npx257_5gL_5dL_epoch50.sgan
-```
-This model was trained on a google maps image of barcelona, and yields a texture image like e.g. this
-
-![](samples/stored_models_barcac_filters64_npx257_5gL_5dL_epoch50.sgan.jpg)
-
-It will also create a tilable periodic texture of the city, which is another capability of our SGAN model.
-You can look at the script and tune how big textures you want to create, by changing the parameters NZ1 and NZ2. 
-
-![](samples/TILE_models_barcac_filters64_npx257_5gL_5dL_epoch50.sgan_(256%2C%20256)_(2%2C%203).jpg)
-
-### Training the Model
-To train the model on new images, edit the config.py file and set the texture_dir variable to a folder containing the image(s) you want to learn from. You might also want to change other parameters of the network there (e.g. depth, number of filters per layer etc...). Then run
-```
-python sgan.py
-```
-to train the model. Snapshots of the model will be stored in the subfolder models/ and samples after each epoch will be stored in samples/
-
-### Contact
-- Urs Bergmann    (ursbergmann@gmail.com)
-- Nikolay Jetchev (nikolay.jetchev@zalando.de)
-- Roland Vollgraf (roland.vollgraf@zalando.de)
+THE CURRENT CODE IS SIMPLY A FORK OF THE SGAN CODE - PSGAN CODE WILL BE PUBLISHED SOON.
 
 
 ## License
-Please make sure to cite/acknowledge our paper, if you use any of the conatained code in your own projects or publication:
-Nikolay Jetchev, Urs Bergmann, and Roland Vollgraf. Texture synthesis with spatial generative adversarial networks. CoRR, abs/1611.08207, 2016.
-[https://arxiv.org/abs/1611.08207](https://arxiv.org/abs/1611.08207)
+Please make sure to cite/acknowledge our paper, if you use any of the contained code in your own projects or publication.
 
 
 The MIT License (MIT)
