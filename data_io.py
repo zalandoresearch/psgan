@@ -10,7 +10,7 @@ def image_to_tensor(img):
     changes channel dimension to be in the first position and rescales from [0,255] to [-1,1]
     '''
     tensor = np.array(img).transpose( (2,0,1) )
-    tensor = tensor / 128. - 1.
+    tensor = (tensor / 255.)*2 - 1.
     return tensor
 
 
@@ -20,7 +20,7 @@ def tensor_to_image(tensor):
     changes channel to be last and rescales from [-1, 1] to [0, 255]
     '''
     img = np.array(tensor).transpose( (1,2,0) )
-    img = (img + 1.) * 128.
+    img = (img + 1.)/2 * 255.
     return np.uint8(img)
     
 

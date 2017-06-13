@@ -20,11 +20,20 @@ class Config(object):
     '''
     wraps all configuration parameters in 'static' variables
     '''
+    
+    ##
+    # sampling parameters    
+    nz_local = 30    
+    nz_global = 0                      # num of global Z dimensions
+    nz_periodic = 4                     # num of global Z dimensions
+    nz_periodic_MLPnodes = 50           # the MLP gate for the neural network
+    nz          = nz_local+nz_global+nz_periodic*2                   # num of dim for Z at each field position, sum of local, global, periodic dimensions
+    zx          = 6                    # number of spatial dimensions in Z
+    zx_sample   = 20                    # size of the spatial dimension in Z for producing the samples    
+    zx_sample_quilt = zx_sample/4      # how many tiles in the global dimension quilt for output sampling
+
     ##
     # network parameters
-    nz          = 100                   # num of dim for Z at each field position
-    zx          = 9                     # number of spatial dimensions in Z
-    zx_sample   = 20                    # size of the spatial dimension in Z for producing the samples
     nc          = 3                     # number of channels in input X (i.e. r,g,b)
     gen_ks      = ([(5,5)] * 5)[::-1]   # kernel sizes on each layer - should be odd numbers for zero-padding stuff
     dis_ks      = [(5,5)] * 5           # kernel sizes on each layer - should be odd numbers for zero-padding stuff
@@ -34,13 +43,13 @@ class Config(object):
     gen_fn      = gen_fn[::-1]
     dis_fn      = [2**(n+6) for n in range(dis_ls-1)]+[1]   # discriminative number of filters
 
-    lr          = 0.0005                # learning rate of adam
+    lr          = 0.0002                # learning rate of adam
     b1          = 0.5                   # momentum term of adam
-    l2_fac      = 1e-5                  # L2 weight regularization factor
+    l2_fac      = 1e-8                  # L2 weight regularization factor
 
-    batch_size  = 64
+    batch_size  = 16
 
-    epoch_iters = batch_size * 100
+    epoch_iters = batch_size * 400
 
     k           = 1                     # number of D updates vs G updates
 
@@ -48,9 +57,9 @@ class Config(object):
 
     ##
     # data input folder
-    sub_name    = 'efros2'
+    sub_name    = 'hex1'# "escher"#
     home        = os.path.expanduser("~")
-    texture_dir = home + "/my_data/%s/" % sub_name
+    texture_dir = home + "/DILOG/dcgan_code-master/texture_gan/%s/" % sub_name
     data_iter   = get_texture_iter(texture_dir, npx=npx, mirror=False, batch_size=batch_size)
 
     save_name   = sub_name+ "_filters%d_npx%d_%dgL_%ddL" % (dis_fn[0],npx,gen_ls, dis_ls)
