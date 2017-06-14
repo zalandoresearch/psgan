@@ -90,9 +90,13 @@ class PeriodicLayer(lasagne.layers.Layer):
             band0 = (T.tensordot(relu(h),self.wave_params[2], [1, 0]).dimshuffle(0, 3, 1, 2)) + self.wave_params[3].dimshuffle('x', 0, 'x', 'x')  # #moved relu inside
         else:
             band0 = self.wave_params[0].dimshuffle('x', 0, 'x', 'x')
-
-        band1 = Z[:, -nPeriodic * 2::2] * band0[:, :nPeriodic] + Z[:, -nPeriodic * 2 + 1::2] * band0[:, nPeriodic:2 * nPeriodic]
-        band2 = Z[:, -nPeriodic * 2::2] * band0[:, 2 * nPeriodic:3 * nPeriodic] + Z[:, -nPeriodic * 2 + 1::2] * band0[:, 3 * nPeriodic:]
+        
+        if self.config.periodic_affine:
+            band1 = Z[:, -nPeriodic * 2::2] * band0[:, :nPeriodic] + Z[:, -nPeriodic * 2 + 1::2] * band0[:, nPeriodic:2 * nPeriodic]
+            band2 = Z[:, -nPeriodic * 2::2] * band0[:, 2 * nPeriodic:3 * nPeriodic] + Z[:, -nPeriodic * 2 + 1::2] * band0[:, 3 * nPeriodic:]
+        else:
+            band1 = Z[:, -nPeriodic * 2::2] * band0[:, :nPeriodic] 
+            band2 = Z[:, -nPeriodic * 2 + 1::2] * band0[:, 3 * nPeriodic:]
         band = T.concatenate([band1 , band2], axis=1)       
         ##random phase added here, use random stream generator
         band += srng.uniform((Z.shape[0],nPeriodic * 2)).dimshuffle(0,1, 'x', 'x') *np.pi*2

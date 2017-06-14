@@ -23,13 +23,14 @@ class Config(object):
     
     ##
     # sampling parameters    
-    nz_local = 30    
+    nz_local = 15    
     nz_global = 0                      # num of global Z dimensions
-    nz_periodic = 4                     # num of global Z dimensions
-    nz_periodic_MLPnodes = 50           # the MLP gate for the neural network
+    nz_periodic = 3                    # num of global Z dimensions
+    nz_periodic_MLPnodes = 50          # the MLP gate for the neural network
     nz          = nz_local+nz_global+nz_periodic*2                   # num of dim for Z at each field position, sum of local, global, periodic dimensions
+    periodic_affine = False            # if True planar waves sum x,y sinusoids, else axes aligned sinusoids x or y 
     zx          = 6                    # number of spatial dimensions in Z
-    zx_sample   = 20                    # size of the spatial dimension in Z for producing the samples    
+    zx_sample   = 32                   # size of the spatial dimension in Z for producing the samples    
     zx_sample_quilt = zx_sample/4      # how many tiles in the global dimension quilt for output sampling
 
     ##
@@ -47,7 +48,7 @@ class Config(object):
     b1          = 0.5                   # momentum term of adam
     l2_fac      = 1e-8                  # L2 weight regularization factor
 
-    batch_size  = 16
+    batch_size  = 25
 
     epoch_iters = batch_size * 400
 
@@ -57,12 +58,12 @@ class Config(object):
 
     ##
     # data input folder
-    sub_name    = 'hex1'# "escher"#
+    sub_name    = 'hex1'#"escher"# 
     home        = os.path.expanduser("~")
     texture_dir = home + "/DILOG/dcgan_code-master/texture_gan/%s/" % sub_name
     data_iter   = get_texture_iter(texture_dir, npx=npx, mirror=False, batch_size=batch_size)
 
-    save_name   = sub_name+ "_filters%d_npx%d_%dgL_%ddL" % (dis_fn[0],npx,gen_ls, dis_ls)
+    save_name   = sub_name+ "_filters%d_npx%d_%dgL_%ddL_%dGlobal_%dPeriodic_%sAffine_%dLocal" % (dis_fn[0],npx,gen_ls, dis_ls,nz_global,nz_periodic,periodic_affine ,nz_local)
 
     load_name   = None                  # if None, initializing network from scratch
     # load_name   = "efros_filters64_npx257_5gL_5dL_epoch1.sgan"
