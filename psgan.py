@@ -43,21 +43,21 @@ srng = RandomStreams(seed=234)
 ## @param zx spatial size, now implemented only in square shapes
 ## @param batch_size how many instances in mini-batch
 ## @param zx_quilt if not None, will set  some parts of the global dims to random values in different spatial regions (tiles), else all global dim. are equal to the same vector spatially
-def sample_noise_tensor(batch_size,zx,zx_quilt=None):
-    Z = np.zeros((batch_size,Config.nz,zx,zx))
-    Z[:,Config.nz_global:Config.nz_global+Config.nz_local] = np.random.uniform(-1.,1., (batch_size, Config.nz_local, zx, zx) )
+def sample_noise_tensor(config,batch_size,zx,zx_quilt=None):
+    Z = np.zeros((batch_size,config.nz,zx,zx))
+    Z[:,Config.nz_global:config.nz_global+config.nz_local] = np.random.uniform(-1.,1., (batch_size, config.nz_local, zx, zx) )
     
     if zx_quilt is None:
-        Z[:,:Config.nz_global] = np.random.uniform(-1.,1., (batch_size, Config.nz_global, 1, 1) )
+        Z[:,:config.nz_global] = np.random.uniform(-1.,1., (batch_size, config.nz_global, 1, 1) )
     else:
         for i in range(zx/zx_quilt):
             for j in range(zx/zx_quilt):
-                Z[:,:Config.nz_global,i*zx_quilt:(i+1)*zx_quilt, j*zx_quilt:(j+1)*zx_quilt]    =np.random.uniform(-1.,1., (batch_size, Config.nz_global, 1, 1) )
+                Z[:,:config.nz_global,i*zx_quilt:(i+1)*zx_quilt, j*zx_quilt:(j+1)*zx_quilt]    =np.random.uniform(-1.,1., (batch_size, config.nz_global, 1, 1) )
     
     
-    if Config.nz_periodic > 0:
-        for i,pixel in zip(range(1,Config.nz_periodic+1),np.linspace(30,130,Config.nz_periodic)):
-            band =  np.pi*(0.5*i / float(Config.nz_periodic) +0.5   )##initial values for numerical stability            
+    if config.nz_periodic > 0:
+        for i,pixel in zip(range(1,config.nz_periodic+1),np.linspace(30,130,config.nz_periodic)):
+            band =  np.pi*(0.5*i / float(config.nz_periodic) +0.5   )##initial values for numerical stability            
             ##just horizontal and vertical coordinate indices
             for h in range(zx):
                 Z[:, -i*2,:, h] = h * band 
@@ -68,10 +68,8 @@ def sample_noise_tensor(batch_size,zx,zx_quilt=None):
 class PeriodicLayer(lasagne.layers.Layer):
 
     def __init__(self,incoming,config,wave_params):
-        print "initing layer"
         self.config = config       
         self.wave_params = wave_params
-        print "done"
         self.input_layer= incoming
         self.input_shape = incoming.output_shape
         self.get_output_kwargs = []
@@ -120,12 +118,14 @@ class PSGAN(object):
         @static configuration class
         @param name     load stored sgan model
         '''
-        self.config = Config
+        
         if name is not None:
             print "loading parameters from file:",name
 
             vals =joblib.load(name)
-            
+            self.config = vals["config"]
+
+            print "global dimensions of loaded config file",self.config.nz_global 
             
             self.dis_W = [sharedX(p) for p in vals["dis_W"]]
             self.dis_g = [sharedX(p) for p in vals["dis_g"]]
@@ -160,6 +160,8 @@ class PSGAN(object):
             self._setup_gen_params(self.config.gen_ks, self.config.gen_fn)
             self._setup_dis_params(self.config.dis_ks, self.config.dis_fn)
         else:
+            self.config = Config
+
             self._setup_gen_params(self.config.gen_ks, self.config.gen_fn)
             self._setup_dis_params(self.config.dis_ks, self.config.dis_fn)
             ##
@@ -173,7 +175,7 @@ class PSGAN(object):
 
 
     def save(self,name):
-        print "saving SGAN parameters in file: ", name
+        print "saving PSGAN parameters in file: ", name
         vals = {}
         vals["config"] = self.config
         vals["dis_W"] = [p.get_value() for p in self.dis_W]
@@ -201,7 +203,7 @@ class PSGAN(object):
                 lin1 =  sharedX( g_init.sample( (self.config.nz_global,nperiodK)))
                 bias1 = sharedX( g_init.sample( (nperiodK)))
                 lin2 =  sharedX( g_init.sample( (nperiodK,nPeriodic * 2*2)))
-                bias2 = sharedX( g_init.sample( (nPeriodic * 2*nAffine)))
+                bias2 = sharedX( g_init.sample( (nPeriodic * 2*2)))
                 self.wave_params = [lin1,bias1,lin2,bias2]
             else:##in case no global dimensions learn global wave numbers
                 bias2 = sharedX( g_init.sample( (nPeriodic * 2*2)))
@@ -287,11 +289,11 @@ class PSGAN(object):
 
     def _spatial_generator(self, inlayer):
         '''
-        creates a SGAN generator network
+        creates a PSGAN generator network
         @param  inlayer     Lasagne layer
         '''
         layers  = [inlayer]
-        layers.append(periodic(inlayer,self.wave_params))##TODO what is the inputshape of that guy?
+        layers.append(periodic(inlayer,self.wave_params))
         for l in range(self.gen_depth-1):
             layers.append( batchnorm(tconv(layers[-1], self.gen_fn[l], self.gen_ks[l],self.gen_W[l], nonlinearity=relu),gamma=self.gen_g[l],beta=self.gen_b[l]) )
         output  = tconv(layers[-1], self.gen_fn[-1], self.gen_ks[-1],self.gen_W[-1] , nonlinearity=tanh)
@@ -300,7 +302,7 @@ class PSGAN(object):
 
     def _spatial_discriminator(self, inlayer):
         '''
-        creates a SGAN discriminator network
+        creates a PSGAN discriminator network
         @param  inlayer     Lasagne layer
         '''
         layers  = [inlayer]
@@ -354,19 +356,17 @@ class PSGAN(object):
 
 
 if __name__=="__main__":
-
-    c           = Config
-
+    c           = Config()
+    
     if c.load_name   == None:
         psgan        = PSGAN()
     else:
         psgan        = PSGAN(name='models/' + c.load_name)
         
     c.print_info()
-
     ##
     # sample used just for visualisation
-    z_sample        = sample_noise_tensor(1,c.zx_sample,c.zx_sample_quilt)
+    z_sample        = sample_noise_tensor(c,1,c.zx_sample,c.zx_sample_quilt)
     epoch           = 0
     tot_iter        = 0
 
@@ -385,7 +385,7 @@ if __name__=="__main__":
             tot_iter+=1
 
             # random samples for training
-            Znp = sample_noise_tensor(c.batch_size,c.zx) 
+            Znp = sample_noise_tensor(c,c.batch_size,c.zx) 
 
             if tot_iter % (c.k+1) == 0:
                 cost = psgan.train_g(Znp)
@@ -412,5 +412,5 @@ if __name__=="__main__":
         data = psgan.generate(z_sample)
 
         save_tensor(data[0], 'samples/largesample%s_epoch%d.jpg' % (c.save_name,epoch))
-        psgan.save('models/%s_epoch%d.sgan'%(c.save_name,epoch))
+        psgan.save('models/%s_epoch%d.psgan'%(c.save_name,epoch))
 

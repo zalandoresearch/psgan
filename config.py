@@ -23,8 +23,8 @@ class Config(object):
     
     ##
     # sampling parameters    
-    nz_local = 15    
-    nz_global = 0                      # num of global Z dimensions
+    nz_local = 30    
+    nz_global = 50                      # num of global Z dimensions
     nz_periodic = 3                    # num of global Z dimensions
     nz_periodic_MLPnodes = 50          # the MLP gate for the neural network
     nz          = nz_local+nz_global+nz_periodic*2                   # num of dim for Z at each field position, sum of local, global, periodic dimensions
@@ -58,7 +58,7 @@ class Config(object):
 
     ##
     # data input folder
-    sub_name    = 'hex1'#"escher"# 
+    sub_name    = "honey"#'hex1'#
     home        = os.path.expanduser("~")
     texture_dir = home + "/DILOG/dcgan_code-master/texture_gan/%s/" % sub_name
     data_iter   = get_texture_iter(texture_dir, npx=npx, mirror=False, batch_size=batch_size)

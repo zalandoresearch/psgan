@@ -1,25 +1,28 @@
-from sgan import SGAN
+from psgan import PSGAN,sample_noise_tensor
 import sys
 import numpy as np
 from data_io import save_tensor
 
 if len(sys.argv) <=1:
     print "please give model filename"
+    print "e.g. checked github model hex1_filters64_npx161_5gL_5dL_0Global_3Periodic_15Local_epoch43.sgan"
     raise Exception('no filename specified')
 
 name = sys.argv[1]
 print "using stored model",name
 
 ##sample a periodically tiling texture
-def mosaic_tile(sgan,NZ1=12,NZ2=12, repeat=(2,3)):
+def mosaic_tile(psgan,NZ1=12,NZ2=12, repeat=(2,3)):
     ovp = 2  # how many z values should we keep for overlap, for 5 layer architecture and (5,5) kernels 2 is enough
-    tot_subsample= 2**sgan.gen_depth   
+    tot_subsample= 2**psgan.gen_depth   
     print "NZ1 NZ2 for tilable texture: ", NZ1, NZ2
 
-    sample_zmb = np.random.uniform(-1.,1., (1, sgan.config.nz, NZ1,NZ2) )
+    sample_zmb = sample_noise_tensor(psgan.config,1,max(NZ1,NZ2))[:,:,:NZ1,:NZ2] 
+
+
     sample_zmb[:, :, :, -ovp * 2:] = sample_zmb[:, :, :, :ovp * 2]
     sample_zmb[:, :, -ovp * 2:, :] = sample_zmb[:, :, :ovp * 2, :]
-    samples = sgan.generate(sample_zmb)
+    samples = psgan.generate(sample_zmb)
     
     #measure the optimal offset of pixels we crop from the edge of the tile: this should have loss of 0 if the tile is perfectly periodical
     ##note: for Theano code we had a nice analytical formula for the optimal offset
@@ -53,17 +56,17 @@ def mosaic_tile(sgan,NZ1=12,NZ2=12, repeat=(2,3)):
     return
 
 #sample a random texture
-def sample_texture(sgan,NZ1=60,NZ2=60):    
-    z_sample        = np.random.uniform(-1.,1., (1, c.nz, NZ1,NZ2) )
-    data = sgan.generate(z_sample)
+def sample_texture(psgan,NZ1=60,quilt_tile = 20):    
+    z_sample        = sample_noise_tensor(psgan.config,1,NZ1,quilt_tile) 
+    data = psgan.generate(z_sample)
     save_tensor(data[0], 'samples/stored_%s.jpg' % (name.replace('/','_')))
 
-sgan        = SGAN(name=name)
-c=sgan.config
-print "nz",c.nz
+psgan        = PSGAN(name=name)
+c=psgan.config
+print "nz",c.nz, "global Dimensions",c.nz_global,"periodic Dimensions",c.nz_periodic
 print "G values",c.gen_fn,c.gen_ks
 print "D values",c.dis_fn, c.dis_ks
 
-sample_texture(sgan)
-mosaic_tile(sgan)
+sample_texture(psgan)
+mosaic_tile(psgan)
 
