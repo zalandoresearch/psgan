@@ -370,8 +370,7 @@ if __name__=="__main__":
     epoch           = 0
     tot_iter        = 0
 
-
-    while True:
+    while epoch < epoch_count:
         epoch       += 1
         print("Epoch %d" % epoch)
 

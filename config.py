@@ -24,7 +24,7 @@ class Config(object):
     ##
     # sampling parameters    
     nz_local = 30    
-    nz_global = 50                      # num of global Z dimensions
+    nz_global = 60                      # num of global Z dimensions
     nz_periodic = 3                    # num of global Z dimensions
     nz_periodic_MLPnodes = 50          # the MLP gate for the neural network
     nz          = nz_local+nz_global+nz_periodic*2                   # num of dim for Z at each field position, sum of local, global, periodic dimensions
@@ -50,7 +50,8 @@ class Config(object):
 
     batch_size  = 25
 
-    epoch_iters = batch_size * 400
+    epoch_iters = batch_size * 1000      #steps inside one epoch
+    epoch_count = 100                    #how many epochs to do globally    
 
     k           = 1                     # number of D updates vs G updates
 
