@@ -45,7 +45,7 @@ srng = RandomStreams(seed=234)
 ## @param zx_quilt if not None, will set  some parts of the global dims to random values in different spatial regions (tiles), else all global dim. are equal to the same vector spatially
 def sample_noise_tensor(config,batch_size,zx,zx_quilt=None):
     Z = np.zeros((batch_size,config.nz,zx,zx))
-    Z[:,Config.nz_global:config.nz_global+config.nz_local] = np.random.uniform(-1.,1., (batch_size, config.nz_local, zx, zx) )
+    Z[:,config.nz_global:config.nz_global+config.nz_local] = np.random.uniform(-1.,1., (batch_size, config.nz_local, zx, zx) )
     
     if zx_quilt is None:
         Z[:,:config.nz_global] = np.random.uniform(-1.,1., (batch_size, config.nz_global, 1, 1) )
@@ -107,7 +107,7 @@ class PeriodicLayer(lasagne.layers.Layer):
         return (input_shape[0],input_shape[1]+self.config.nz_periodic*2,input_shape[2],input_shape[3])     
 
 
-periodic = lambda incoming,wave_params: PeriodicLayer(incoming,Config,wave_params)
+periodic = lambda incoming,config,wave_params: PeriodicLayer(incoming,config,wave_params)
 
 ##
 # network code
@@ -160,7 +160,7 @@ class PSGAN(object):
             self._setup_gen_params(self.config.gen_ks, self.config.gen_fn)
             self._setup_dis_params(self.config.dis_ks, self.config.dis_fn)
         else:
-            self.config = Config
+            self.config = Config()
 
             self._setup_gen_params(self.config.gen_ks, self.config.gen_fn)
             self._setup_dis_params(self.config.dis_ks, self.config.dis_fn)
@@ -293,7 +293,7 @@ class PSGAN(object):
         @param  inlayer     Lasagne layer
         '''
         layers  = [inlayer]
-        layers.append(periodic(inlayer,self.wave_params))
+        layers.append(periodic(inlayer,self.config,self.wave_params))
         for l in range(self.gen_depth-1):
             layers.append( batchnorm(tconv(layers[-1], self.gen_fn[l], self.gen_ks[l],self.gen_W[l], nonlinearity=relu),gamma=self.gen_g[l],beta=self.gen_b[l]) )
         output  = tconv(layers[-1], self.gen_fn[-1], self.gen_ks[-1],self.gen_W[-1] , nonlinearity=tanh)
@@ -354,15 +354,9 @@ class PSGAN(object):
         self.generate   = theano.function([Z.input_var], prediction_gen, allow_input_downcast=True)
         TimePrint("generate function done.")
 
-
-if __name__=="__main__":
-    c           = Config()
-    
-    if c.load_name   == None:
-        psgan        = PSGAN()
-    else:
-        psgan        = PSGAN(name='models/' + c.load_name)
-        
+if __name__=="__main__":   
+    psgan        = PSGAN()
+    c = psgan.config           
     c.print_info()
     ##
     # sample used just for visualisation
@@ -378,7 +372,7 @@ if __name__=="__main__":
         Dcost = []
 
         iters = c.epoch_iters / c.batch_size
-        for it, samples in enumerate(tqdm(c.data_iter, total=iters)):
+        for it, samples in enumerate(tqdm(c.data_iter(), total=iters)):
             if it >= iters:
                 break
             tot_iter+=1
