@@ -14,6 +14,9 @@ PSGANs can generate sample textures of arbitrary size that look strikingly simil
 Please take a look at our paper for detailed description of PSGANs  [https://arxiv.org/abs/1705.06566](https://arxiv.org/abs/1705.06566) .
 
 ### Examples
+
+**NEW**: You can follow a **step-by-step tutorial** on inference and training PSGAN in the newly checked-in Ipython Notebook **PSGAN tutorial for sampling and training**.
+
 You can generate samples from a stored model. E.g. you can use the checked-in model:
 ```
 python demo_generation.py models/hex1_filters64_npx161_5gL_5dL_0Global_3Periodic_FalseAffine_30Local_epoch18.psgan
