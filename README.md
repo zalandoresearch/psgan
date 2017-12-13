@@ -14,6 +14,9 @@ PSGANs can generate sample textures of arbitrary size that look strikingly simil
 Please take a look at our paper for detailed description of PSGANs  [https://arxiv.org/abs/1705.06566](https://arxiv.org/abs/1705.06566) .
 
 ### Examples
+**NEW**: better use of inference mode in the Ipython Notebook tutorial using pretrained statistics. In addition, a beatiful-looking pretrained model of DTD Scaly category is checked-in.
+
+![](samples/largesamplescaly_filters69_npx161_5gL_5dL_20Global_10Periodic_TrueAffine_50Local_epoch43.jpg)
 
 **NEW**: You can follow a **step-by-step tutorial** on inference and training PSGAN in the newly checked-in Ipython Notebook **PSGAN tutorial for sampling and training**.
 
