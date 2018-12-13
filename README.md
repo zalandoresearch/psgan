@@ -3,6 +3,9 @@
 This code implements Periodic Spatial Generative Adversarial Networks (PSGANs) on top of Lasagne/Theano.
 The code was tested on top of Lasagne (version 0.2.dev1) and Theano (0.9.0dev2).
 
+### Update 13.12.2018
+A Pytorch version of this texture synthesis method is now available at https://github.com/zalandoresearch/famos
+
 ### Very Brief Model Description
 PSGANs can generate sample textures of arbitrary size that look strikingly similar - but not exactly the same - compared to a single (or several) source image(s).
 - PSGANs can be thought of as a convolutional roll-out of [Radford et al.'s](https://github.com/Newmu/dcgan_code) deep convolutional generative adversarial networks for texture synthesis
